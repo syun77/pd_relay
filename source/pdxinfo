@@ -1,6 +1,6 @@
-name=Game
-author=
-description=
-bundleID=
-version=1.0.0
+name=Tsukikage Janto
+author=Codex
+description=One-on-one mahjong with rewind abilities
+bundleID=com.codex.tsukikagejanto
+version=0.1.0
 buildNumber=1
