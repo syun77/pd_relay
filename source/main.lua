@@ -38,6 +38,7 @@ local resultDetail = ""
 local pendingRonTile = nil
 local flashUntil = 0
 local cpuThinkUntil = 0
+local riichiAutoDiscardAt = 0
 local aDownAt, bDownAt = nil, nil
 local nowMs = 0
 
@@ -333,6 +334,7 @@ local function setupHand()
     cpuAbilityUsed = false
     reverseUsed, reverseReady = false, false
     reverseSnapshot = nil
+    riichiAutoDiscardAt = 0
     phase = phases.PLAYER
     beginPlayerDraw()
 end
@@ -355,7 +357,15 @@ function beginPlayerDraw()
     -- Keep the drawn tile at the far right so it is immediately recognizable.
     selected = clamp(selected, 1, #player.hand)
     local info = scoreHand(player.hand, player.riichi)
-    if info then phase = phases.TSUMO else phase = phases.PLAYER end
+    if info then
+        phase = phases.TSUMO
+    else
+        phase = phases.PLAYER
+        if player.riichi then
+            selected = #player.hand
+            riichiAutoDiscardAt = nowMs + 500
+        end
+    end
     updatePressure()
 end
 
@@ -404,6 +414,7 @@ local function doReverse()
     reverseUsed = true
     reverseReady = false
     player.riichi = false
+    riichiAutoDiscardAt = 0
     selected = clamp(selected, 1, #player.hand)
     phase = phases.PLAYER
     showToast("REWOUND / RIICHI LOCKED", 1600)
@@ -449,6 +460,9 @@ local function playerDiscard(isRiichi)
         showToast("RIICHI NOT AVAILABLE", 1100); return
     end
     local discard = table.remove(player.hand, selected)
+    -- The drawn tile stays on the right until a discard; then restore a tidy hand.
+    sortHand(player.hand)
+    riichiAutoDiscardAt = 0
     table.insert(player.river, discard)
     if isRiichi then player.riichi = true end
     reverseReady = true
@@ -595,7 +609,10 @@ local function drawGame()
     drawRiver(cpu.river, 75, cpuType == 2 and cpuAbilityUsed)
     gfx.drawLine(0, 113, 399, 113)
     local center = "DRAW TO PLAY"
-    if phase == phases.PLAYER then center = hintMode and "HINT: KEEP PAIRS / RUNS" or (inspectMode and "INSPECT: RIVERS + PRESSURE" or "CHOOSE A TILE") end
+    if phase == phases.PLAYER then
+        center = hintMode and "HINT: KEEP PAIRS / RUNS" or (inspectMode and "INSPECT: RIVERS + PRESSURE" or "CHOOSE A TILE")
+        if riichiAutoDiscardAt > nowMs then center = "RIICHI: AUTO DISCARD" end
+    end
     if phase == phases.TSUMO then center = "TSUMO?  A: YES   B: NO" end
     if phase == phases.RON then center = "RON?  A: YES   B: NO" end
     if phase == phases.CPU then center = "CPU THINKING..." end
@@ -697,19 +714,19 @@ function pd.update()
     if pd.buttonJustPressed(pd.kButtonB) then bDownAt = nowMs end
     if pd.buttonJustPressed(pd.kButtonLeft) then
         if phase == phases.TITLE then menuItem = clamp(menuItem - 1, 1, 3)
-        elseif phase == phases.PLAYER then selected = clamp(selected - 1, 1, #player.hand) end
+        elseif phase == phases.PLAYER and riichiAutoDiscardAt == 0 then selected = clamp(selected - 1, 1, #player.hand) end
     end
     if pd.buttonJustPressed(pd.kButtonRight) then
         if phase == phases.TITLE then menuItem = clamp(menuItem + 1, 1, 3)
-        elseif phase == phases.PLAYER then selected = clamp(selected + 1, 1, #player.hand) end
+        elseif phase == phases.PLAYER and riichiAutoDiscardAt == 0 then selected = clamp(selected + 1, 1, #player.hand) end
     end
     if pd.buttonJustPressed(pd.kButtonUp) then
         if phase == phases.TITLE then menuItem = clamp(menuItem - 1, 1, 3)
-        elseif phase == phases.PLAYER then inspectMode = not inspectMode end
+        elseif phase == phases.PLAYER and riichiAutoDiscardAt == 0 then inspectMode = not inspectMode end
     end
     if pd.buttonJustPressed(pd.kButtonDown) then
         if phase == phases.TITLE then menuItem = clamp(menuItem + 1, 1, 3)
-        elseif phase == phases.PLAYER then hintMode = not hintMode end
+        elseif phase == phases.PLAYER and riichiAutoDiscardAt == 0 then hintMode = not hintMode end
     end
 
     if pd.buttonJustReleased(pd.kButtonB) then
@@ -728,7 +745,7 @@ function pd.update()
         aDownAt = nil
         if phase == phases.TITLE then startSelected()
         elseif phase == phases.HELP then phase = phases.TITLE
-        elseif phase == phases.PLAYER then playerDiscard(held >= 550 and not reverseUsed)
+        elseif phase == phases.PLAYER and riichiAutoDiscardAt == 0 then playerDiscard(held >= 550 and not reverseUsed)
         elseif phase == phases.TSUMO then
             local info = scoreHand(player.hand, player.riichi)
             finishHand(1, "TSUMO", player.hand[#player.hand], info)
@@ -739,6 +756,10 @@ function pd.update()
         elseif phase == phases.HAND_RESULT then advanceHand()
         elseif phase == phases.MATCH_RESULT then phase = phases.TITLE
         end
+    end
+    if phase == phases.PLAYER and riichiAutoDiscardAt > 0 and nowMs >= riichiAutoDiscardAt then
+        selected = #player.hand
+        playerDiscard(false)
     end
     if phase == phases.CPU and nowMs >= cpuThinkUntil and not pd.buttonIsPressed(pd.kButtonB) then
         cpuTakeTurn()
