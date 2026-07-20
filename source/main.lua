@@ -10,7 +10,7 @@ local gfx <const> = pd.graphics
 local W, H = 400, 240
 local suitNames = { "M", "P", "S" }
 local suitNamesLong = { "MAN", "PIN", "SOU" }
-local phases = { TITLE=1, HELP=2, PLAYER=3, TSUMO=4, RON=5, CPU=6, HAND_RESULT=7, MATCH_RESULT=8, ABILITY=9 }
+local phases = { TITLE=1, HELP=2, PLAYER=3, TSUMO=4, RON=5, CPU=6, HAND_RESULT=7, MATCH_RESULT=8, ABILITY=9, CPU_RON=10 }
 local phase = phases.TITLE
 local menuItem = 1
 local cpuType = 1 -- 1: Yui, 2: Haido
@@ -39,6 +39,14 @@ local pendingRonTile = nil
 local flashUntil = 0
 local cpuThinkUntil = 0
 local riichiAutoDiscardAt = 0
+local leftRepeatAt, rightRepeatAt = 0, 0
+local cpuRonTile = nil
+local cpuRonInfo = nil
+local cpuRonUntil = 0
+local resultInfo = nil
+local resultWinTile = nil
+local resultPoints = 0
+local resultHand = nil
 local aDownAt, bDownAt = nil, nil
 local nowMs = 0
 
@@ -46,6 +54,11 @@ local function clamp(v, lo, hi)
     if v < lo then return lo end
     if v > hi then return hi end
     return v
+end
+
+local function moveHandCursor(delta)
+    if #player.hand == 0 then return end
+    selected = ((selected - 1 + delta) % #player.hand) + 1
 end
 
 local function copyArray(source)
@@ -335,6 +348,7 @@ local function setupHand()
     reverseUsed, reverseReady = false, false
     reverseSnapshot = nil
     riichiAutoDiscardAt = 0
+    cpuRonTile, cpuRonInfo, cpuRonUntil = nil, nil, 0
     phase = phases.PLAYER
     beginPlayerDraw()
 end
@@ -377,6 +391,12 @@ end
 local function finishHand(winner, winType, winTile, info)
     local points = 0
     if info then points = clamp(1000 * (2 ^ math.max(0, info.han - 1)), 1000, 8000) end
+    resultInfo, resultWinTile, resultPoints = info, winTile, points
+    resultHand = nil
+    if winner == 2 then
+        resultHand = copyArray(cpu.hand)
+        if winType == "RON" then table.insert(resultHand, winTile); sortHand(resultHand) end
+    end
     if winner ~= 0 then applyHandScore(winner, points) end
     if winner == 1 then
         resultText = (winType == "TSUMO" and "PLAYER TSUMO" or "PLAYER RON")
@@ -389,6 +409,13 @@ local function finishHand(winner, winType, winTile, info)
     end
     phase = phases.HAND_RESULT
     flashUntil = nowMs + 800
+end
+
+local function beginCpuRon(tile, info)
+    cpuRonTile, cpuRonInfo = tile, info
+    cpuRonUntil = nowMs + 900
+    phase = phases.CPU_RON
+    flashUntil = nowMs + 900
 end
 
 local function advanceHand()
@@ -465,6 +492,11 @@ local function playerDiscard(isRiichi)
     riichiAutoDiscardAt = 0
     table.insert(player.river, discard)
     if isRiichi then player.riichi = true end
+    local ronInfo = scoreHand(appendTile(cpu.hand, discard), cpu.riichi)
+    if ronInfo then
+        beginCpuRon(discard, ronInfo)
+        return
+    end
     reverseReady = true
     phase = phases.CPU
     cpuThinkUntil = nowMs + 350
@@ -603,6 +635,20 @@ end
 
 local function drawGame()
     drawHeader()
+    if phase == phases.CPU_RON then
+        gfx.fillRect(0, 30, 399, 95)
+        gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
+        gfx.drawTextAligned("CPU RON!", 200, 38, kTextAlignment.center)
+        gfx.drawTextAligned("OPEN HAND", 200, 55, kTextAlignment.center)
+        gfx.setImageDrawMode(gfx.kDrawModeCopy)
+        for i,tile in ipairs(cpu.hand) do
+            drawTile(tile, 23 + (i-1)*25, 76, 21, 27, false, false)
+        end
+        drawTile(cpuRonTile, 23 + #cpu.hand*25 + 3, 76, 21, 27, false, false)
+        gfx.drawTextAligned("RON", 200, 137, kTextAlignment.center)
+        gfx.drawText("YOU " .. scores[1] .. "     CPU " .. scores[2], 93, 180)
+        return
+    end
     gfx.drawText("CPU", 8, 34)
     for i=1,13 do drawBack(48 + (i-1)*25, 31, 20, 25) end
     gfx.drawText("CPU RIVER", 8, 59)
@@ -661,15 +707,26 @@ end
 
 local function drawResult()
     drawHeader()
-    gfx.drawTextAligned(resultText, 200, 68, kTextAlignment.center)
-    local y = 104
-    for line in string.gmatch(resultDetail, "[^\n]+") do
-        gfx.drawTextAligned(line, 200, y, kTextAlignment.center); y = y + 20
+    gfx.drawTextAligned(resultText, 200, 42, kTextAlignment.center)
+    if resultInfo then
+        gfx.drawText("YAKU", 20, 72)
+        gfx.drawTextAligned(resultInfo.names, 225, 72, kTextAlignment.center)
+        gfx.drawText("WIN", 20, 98)
+        drawTile(resultWinTile, 58, 92, 23, 28, false, false)
+        gfx.drawText("+" .. resultPoints, 94, 101)
+    else
+        gfx.drawTextAligned(resultDetail, 200, 92, kTextAlignment.center)
     end
-    gfx.drawText("YOU " .. scores[1] .. "     CPU " .. scores[2], 93, 166)
+    if resultHand and phase ~= phases.MATCH_RESULT then
+        gfx.drawText("CPU HAND", 20, 136)
+        for i,tile in ipairs(resultHand) do
+            drawTile(tile, 20 + (i-1)*26, 154, 22, 27, false, false)
+        end
+    end
+    gfx.drawText("YOU " .. scores[1] .. "     CPU " .. scores[2], 93, 198)
     if phase == phases.MATCH_RESULT then
         local winner = scores[1] == scores[2] and "SUDDEN DEATH" or (scores[1] > scores[2] and "YOU WIN MATCH" or "CPU WINS MATCH")
-        gfx.drawTextAligned(winner, 200, 190, kTextAlignment.center)
+        gfx.drawTextAligned(winner, 200, 180, kTextAlignment.center)
         gfx.drawText("A TITLE", 8, 223)
     else gfx.drawText("A NEXT HAND", 8, 223) end
 end
@@ -714,11 +771,17 @@ function pd.update()
     if pd.buttonJustPressed(pd.kButtonB) then bDownAt = nowMs end
     if pd.buttonJustPressed(pd.kButtonLeft) then
         if phase == phases.TITLE then menuItem = clamp(menuItem - 1, 1, 3)
-        elseif phase == phases.PLAYER and riichiAutoDiscardAt == 0 then selected = clamp(selected - 1, 1, #player.hand) end
+        elseif phase == phases.PLAYER and riichiAutoDiscardAt == 0 then
+            moveHandCursor(-1)
+            leftRepeatAt = nowMs + 350
+        end
     end
     if pd.buttonJustPressed(pd.kButtonRight) then
         if phase == phases.TITLE then menuItem = clamp(menuItem + 1, 1, 3)
-        elseif phase == phases.PLAYER and riichiAutoDiscardAt == 0 then selected = clamp(selected + 1, 1, #player.hand) end
+        elseif phase == phases.PLAYER and riichiAutoDiscardAt == 0 then
+            moveHandCursor(1)
+            rightRepeatAt = nowMs + 350
+        end
     end
     if pd.buttonJustPressed(pd.kButtonUp) then
         if phase == phases.TITLE then menuItem = clamp(menuItem - 1, 1, 3)
@@ -732,7 +795,7 @@ function pd.update()
     if pd.buttonJustReleased(pd.kButtonB) then
         local held = nowMs - (bDownAt or nowMs)
         bDownAt = nil
-        if held >= 550 and phase ~= phases.TITLE and phase ~= phases.HELP and phase ~= phases.HAND_RESULT and phase ~= phases.MATCH_RESULT then
+        if held >= 550 and (phase == phases.PLAYER or phase == phases.CPU) then
             phase = phases.ABILITY
         elseif phase == phases.ABILITY then phase = phases.PLAYER
         elseif phase == phases.HELP then phase = phases.TITLE
@@ -740,6 +803,8 @@ function pd.update()
             if phase == phases.TSUMO then phase = phases.PLAYER else beginPlayerDraw() end
         end
     end
+    if pd.buttonJustReleased(pd.kButtonLeft) then leftRepeatAt = 0 end
+    if pd.buttonJustReleased(pd.kButtonRight) then rightRepeatAt = 0 end
     if pd.buttonJustReleased(pd.kButtonA) then
         local held = nowMs - (aDownAt or nowMs)
         aDownAt = nil
@@ -760,6 +825,19 @@ function pd.update()
     if phase == phases.PLAYER and riichiAutoDiscardAt > 0 and nowMs >= riichiAutoDiscardAt then
         selected = #player.hand
         playerDiscard(false)
+    end
+    if phase == phases.PLAYER and riichiAutoDiscardAt == 0 then
+        if pd.buttonIsPressed(pd.kButtonLeft) and leftRepeatAt > 0 and nowMs >= leftRepeatAt then
+            moveHandCursor(-1)
+            leftRepeatAt = nowMs + 90
+        end
+        if pd.buttonIsPressed(pd.kButtonRight) and rightRepeatAt > 0 and nowMs >= rightRepeatAt then
+            moveHandCursor(1)
+            rightRepeatAt = nowMs + 90
+        end
+    end
+    if phase == phases.CPU_RON and nowMs >= cpuRonUntil then
+        finishHand(2, "RON", cpuRonTile, cpuRonInfo)
     end
     if phase == phases.CPU and nowMs >= cpuThinkUntil and not pd.buttonIsPressed(pd.kButtonB) then
         cpuTakeTurn()
