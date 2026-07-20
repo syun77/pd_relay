@@ -352,7 +352,7 @@ function beginPlayerDraw()
         return
     end
     table.insert(player.hand, tile)
-    sortHand(player.hand)
+    -- Keep the drawn tile at the far right so it is immediately recognizable.
     selected = clamp(selected, 1, #player.hand)
     local info = scoreHand(player.hand, player.riichi)
     if info then phase = phases.TSUMO else phase = phases.PLAYER end
