@@ -1,0 +1,29 @@
+{
+  "format": "pdvector",
+  "version": 1,
+  "target": {
+    "sdk": "3.1.1",
+    "width": 32,
+    "height": 32,
+    "coordinate_system": "top-left",
+    "pixel_snap": "integer",
+    "rounding": "nearest",
+    "clip": true
+  },
+  "canvas": {
+    "background": "white",
+    "ditherAnchor": "screen"
+  },
+  "optimize": {
+    "mergeCollinearLines": true,
+    "removeDuplicatePoints": true,
+    "simplifyTolerance": 0
+  },
+  "layers": [
+    {
+      "id": "layer1",
+      "visible": true,
+      "objects": []
+    }
+  ]
+}
