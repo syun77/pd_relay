@@ -43,6 +43,6 @@ luac.out
 .DS_Store
 
 # playdate
-builds
+builds/*
 
 
