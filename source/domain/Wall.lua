@@ -1,6 +1,6 @@
 import "CoreLibs/object"
 
-class("Wall").extends()
+Wall = class("Wall").extends() or Wall
 
 function Wall:init(tiles)
     self.tiles = tiles or {}

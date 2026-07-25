@@ -8,7 +8,7 @@ import "domain/MahjongRules"
 import "domain/ScoreCalculator"
 import "domain/CpuStrategy"
 
-class("Match").extends()
+Match = class("Match").extends() or Match
 
 local function shuffle(deck)
     for i = #deck, 2, -1 do

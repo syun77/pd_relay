@@ -1,7 +1,7 @@
 import "CoreLibs/object"
 import "domain/Hand"
 
-class("Player").extends()
+Player = class("Player").extends() or Player
 
 function Player:init(id, name)
     self.id = id

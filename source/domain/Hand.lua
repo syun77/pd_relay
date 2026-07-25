@@ -2,7 +2,7 @@ import "CoreLibs/object"
 
 import "domain/Tile"
 
-class("Hand").extends()
+Hand = class("Hand").extends() or Hand
 
 function Hand:init()
     self.tiles = {}

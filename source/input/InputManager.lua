@@ -1,6 +1,6 @@
 import "CoreLibs/object"
 
-class("InputManager").extends()
+InputManager = class("InputManager").extends() or InputManager
 
 local bindings = {
     A = playdate.kButtonA,
@@ -9,7 +9,6 @@ local bindings = {
     RIGHT = playdate.kButtonRight,
     UP = playdate.kButtonUp,
     DOWN = playdate.kButtonDown,
-    MENU = playdate.kButtonMenu
 }
 
 function InputManager:init()

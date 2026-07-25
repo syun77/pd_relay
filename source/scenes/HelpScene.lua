@@ -1,6 +1,6 @@
 import "scenes/Scene"
 
-class("HelpScene").extends(Scene)
+HelpScene = class("HelpScene").extends(Scene) or HelpScene
 
 function HelpScene:update(input, now)
     if input:released("A") or input:released("B") or input:released("MENU") then

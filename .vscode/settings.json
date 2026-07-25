@@ -33,6 +33,16 @@
     "Lua.workspace.library": [
         "./.vscode/playdate-luacats"
     ],
+    
+    "Lua.runtime.special": {
+        "import": "require"
+    },
+    
+    "Lua.runtime.path": [
+        "?.lua",
+        "?/init.lua",
+        "source/?.lua"
+    ],
 
     // ====== Playdate Debug Settings ======
     // Output directory for the compiled game bundle (omitting this places it in the project root)

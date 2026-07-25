@@ -2,7 +2,7 @@ import "scenes/Scene"
 import "domain/Tile"
 import "presentation/TileRenderer"
 
-class("ResultScene").extends(Scene)
+ResultScene = class("ResultScene").extends(Scene) or ResultScene
 
 function ResultScene:init(context)
     ResultScene.super.init(self, context)

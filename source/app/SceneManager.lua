@@ -1,6 +1,6 @@
 import "CoreLibs/object"
 
-class("SceneManager").extends()
+SceneManager = class("SceneManager").extends() or SceneManager
 
 function SceneManager:init()
     self.current = nil

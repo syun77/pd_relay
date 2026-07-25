@@ -1,6 +1,6 @@
 import "scenes/Scene"
 
-class("TitleScene").extends(Scene)
+TitleScene = class("TitleScene").extends(Scene) or TitleScene
 
 function TitleScene:init(context)
     TitleScene.super.init(self, context)

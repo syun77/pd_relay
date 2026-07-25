@@ -1,6 +1,6 @@
 import "CoreLibs/object"
 
-class("Scene").extends()
+Scene = class("Scene").extends() or Scene
 
 function Scene:init(context)
     self.context = context

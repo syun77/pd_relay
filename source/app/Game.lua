@@ -8,7 +8,7 @@ import "scenes/HelpScene"
 import "scenes/HandScene"
 import "scenes/ResultScene"
 
-class("Game").extends()
+Game = class("Game").extends() or Game
 
 function Game:init()
     self.input = InputManager()

@@ -4,7 +4,7 @@ import "domain/MahjongRules"
 import "domain/ScoreCalculator"
 import "presentation/TileRenderer"
 
-class("HandScene").extends(Scene)
+HandScene = class("HandScene").extends(Scene) or HandScene
 
 function HandScene:init(context)
     HandScene.super.init(self, context)
