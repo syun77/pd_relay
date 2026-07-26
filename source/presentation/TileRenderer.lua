@@ -32,6 +32,39 @@ local pipLayouts = {
 ---@param h number 高さ.
 ---@param small boolean 小さいサイズで描画するかどうか.
 local function drawMan(number, x, y, w, h, small)
+
+if number == 1 then
+gfx.setColor(gfx.kColorBlack)
+gfx.setLineWidth(1)
+gfx.setLineCapStyle(gfx.kLineCapStyleButt)
+gfx.drawLine(6, 18, 19, 18)
+gfx.setColor(gfx.kColorBlack)
+gfx.setLineWidth(1)
+gfx.setLineCapStyle(gfx.kLineCapStyleButt)
+gfx.drawLine(11, 18, 5.6158166, 29.721302)
+gfx.setColor(gfx.kColorBlack)
+gfx.setLineWidth(1)
+gfx.setLineCapStyle(gfx.kLineCapStyleButt)
+gfx.drawLine(10, 22, 19, 22)
+gfx.setColor(gfx.kColorBlack)
+gfx.setLineWidth(1)
+gfx.setLineCapStyle(gfx.kLineCapStyleButt)
+gfx.drawLine(19, 22, 16, 30)
+gfx.setColor(gfx.kColorBlack)
+gfx.setLineWidth(1)
+gfx.setLineCapStyle(gfx.kLineCapStyleButt)
+gfx.drawLine(14.843369, 30.055294, 16, 30)
+gfx.setColor(gfx.kColorBlack)
+gfx.setLineWidth(1)
+gfx.setLineCapStyle(gfx.kLineCapStyleButt)
+gfx.drawLine(6, 30, 4.7547846, 29.954466)
+gfx.setColor(gfx.kColorBlack)
+gfx.setLineWidth(1)
+gfx.setLineCapStyle(gfx.kLineCapStyleButt)
+gfx.drawLine(5, 7, 21, 7)
+return
+end
+
     local cx, top = x + math.floor(w / 2), y + (small and 9 or 13)
     local span, foot = small and 4 or 6, small and 8 or 10
     gfx.drawTextAligned(tostring(number), cx, y + (small and 0 or 1), kTextAlignment.center)

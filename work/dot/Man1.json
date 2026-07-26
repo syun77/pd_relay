@@ -1,0 +1,213 @@
+{
+  "format": "pdvector",
+  "version": 1,
+  "offset": true,
+  "target": {
+    "sdk": "3.1.1",
+    "width": 24,
+    "height": 32,
+    "coordinate_system": "top-left",
+    "pixel_snap": "integer",
+    "rounding": "nearest",
+    "clip": true
+  },
+  "canvas": {
+    "background": "white",
+    "ditherAnchor": "screen"
+  },
+  "optimize": {
+    "mergeCollinearLines": true,
+    "removeDuplicatePoints": true,
+    "simplifyTolerance": 0
+  },
+  "layers": [
+    {
+      "id": "layer1",
+      "visible": true,
+      "objects": [
+        {
+          "type": "line",
+          "points": [
+            [
+              6.0,
+              18.0
+            ],
+            [
+              19.0,
+              18.0
+            ]
+          ],
+          "closed": false,
+          "style": {
+            "color": "black",
+            "blend": "normal",
+            "width": 1,
+            "cap": "butt",
+            "fill": false,
+            "radius": 4,
+            "dither_pattern": "none"
+          },
+          "transform": null,
+          "children": [],
+          "visible": true
+        },
+        {
+          "type": "line",
+          "points": [
+            [
+              11.0,
+              18.0
+            ],
+            [
+              5.6158166,
+              29.721302
+            ]
+          ],
+          "closed": false,
+          "style": {
+            "color": "black",
+            "blend": "normal",
+            "width": 1,
+            "cap": "butt",
+            "fill": false,
+            "radius": 4,
+            "dither_pattern": "none"
+          },
+          "transform": null,
+          "children": [],
+          "visible": true
+        },
+        {
+          "type": "line",
+          "points": [
+            [
+              10.0,
+              22.0
+            ],
+            [
+              19.0,
+              22.0
+            ]
+          ],
+          "closed": false,
+          "style": {
+            "color": "black",
+            "blend": "normal",
+            "width": 1,
+            "cap": "butt",
+            "fill": false,
+            "radius": 4,
+            "dither_pattern": "none"
+          },
+          "transform": null,
+          "children": [],
+          "visible": true
+        },
+        {
+          "type": "line",
+          "points": [
+            [
+              19.0,
+              22.0
+            ],
+            [
+              16.0,
+              30.0
+            ]
+          ],
+          "closed": false,
+          "style": {
+            "color": "black",
+            "blend": "normal",
+            "width": 1,
+            "cap": "butt",
+            "fill": false,
+            "radius": 4,
+            "dither_pattern": "none"
+          },
+          "transform": null,
+          "children": [],
+          "visible": true
+        },
+        {
+          "type": "line",
+          "points": [
+            [
+              14.843369,
+              30.055294
+            ],
+            [
+              16.0,
+              30.0
+            ]
+          ],
+          "closed": false,
+          "style": {
+            "color": "black",
+            "blend": "normal",
+            "width": 1,
+            "cap": "butt",
+            "fill": false,
+            "radius": 4,
+            "dither_pattern": "none"
+          },
+          "transform": null,
+          "children": [],
+          "visible": true
+        },
+        {
+          "type": "line",
+          "points": [
+            [
+              6.0,
+              30.0
+            ],
+            [
+              4.7547846,
+              29.954466
+            ]
+          ],
+          "closed": false,
+          "style": {
+            "color": "black",
+            "blend": "normal",
+            "width": 1,
+            "cap": "butt",
+            "fill": false,
+            "radius": 4,
+            "dither_pattern": "none"
+          },
+          "transform": null,
+          "children": [],
+          "visible": true
+        },
+        {
+          "type": "line",
+          "points": [
+            [
+              5.0,
+              7.0
+            ],
+            [
+              21.0,
+              7.0
+            ]
+          ],
+          "closed": false,
+          "style": {
+            "color": "black",
+            "blend": "normal",
+            "width": 1,
+            "cap": "butt",
+            "fill": false,
+            "radius": 4,
+            "dither_pattern": "none"
+          },
+          "transform": null,
+          "children": [],
+          "visible": true
+        }
+      ]
+    }
+  ]
+}
