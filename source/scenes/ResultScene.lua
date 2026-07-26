@@ -3,12 +3,20 @@ import "scenes/Scene"
 import "domain/Tile"
 import "presentation/TileRenderer"
 
+local gfx <const> = playdate.graphics
+
+---@class ResultScene: Scene 結果シーン.
+---@field super Scene 親クラス.
 ResultScene = class("ResultScene").extends(Scene) or ResultScene
 
+---初期化.
 function ResultScene:init(context)
     ResultScene.super.init(self, context)
 end
 
+---更新.
+---@param input InputManager 入力管理.
+---@param now number 現在の時間.
 function ResultScene:update(input, now)
     local match = self.context.match
     if input:released("A") then
@@ -21,8 +29,9 @@ function ResultScene:update(input, now)
     end
 end
 
+---描画.
 function ResultScene:draw()
-    local gfx, match = playdate.graphics, self.context.match
+    local match = self.context.match
     local result = match.lastResult
     gfx.drawText("TSUKIKAGE JANTO", 8, 3)
     gfx.drawText("E" .. match.handNumber .. "  " .. (match.dealer == Constants.Game.PLAYER_ID.HUMAN and "OYA" or "CPU OYA"), 160, 3)
@@ -66,6 +75,12 @@ function ResultScene:draw()
     end
 end
 
+---牌の描画.
+---@param tile number 牌の種類.
+---@param x number 描画位置X.
+---@param y number 描画位置Y.
+---@param w number 幅.
+---@param h number 高さ.
 function ResultScene:drawTile(tile, x, y, w, h)
     TileRenderer.draw(tile, x, y, w, h, true, false)
 end

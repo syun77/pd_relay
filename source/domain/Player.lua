@@ -2,6 +2,11 @@ import "CoreLibs/object"
 import "Constants"
 import "domain/Hand"
 
+---@class Player プレイヤーの状態を保持するオブジェクト.
+---@field id number プレイヤーID.
+---@field name string プレイヤー名.
+---@field hand Hand 手牌.
+---@field score number スコア.
 Player = class("Player").extends() or Player
 
 function Player:init(id, name)

@@ -94,6 +94,9 @@ function Match:startHand()
     self:updatePressure()
 end
 
+---プレイヤーが山から牌を引く.
+---@return number|nil tile 引いた牌.
+---@return table|nil info 手牌の情報.
 function Match:drawForPlayer()
     local player = self:player()
     if self.wall:remaining() <= 0 then

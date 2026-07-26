@@ -5,8 +5,12 @@ import "domain/MahjongRules"
 import "domain/ScoreCalculator"
 import "presentation/TileRenderer"
 
+---@class HandScene: Scene 手牌シーン.
+---@field super Scene 親クラス.
 HandScene = class("HandScene").extends(Scene) or HandScene
 
+---初期化.
+---@param context GameContext 各種オブジェクトを保持するコンテキスト
 function HandScene:init(context)
     HandScene.super.init(self, context)
     self.selected = 1
@@ -16,6 +20,7 @@ function HandScene:init(context)
     self.toastUntil = 0
 end
 
+---開始.
 function HandScene:enter()
     self.state = "PLAYER"
     self.selected = 1
@@ -26,12 +31,17 @@ function HandScene:enter()
     if info then self.state = "TSUMO" end
 end
 
+---結果表示.
+---@param result table 結果情報.
 function HandScene:showResult(result)
     local match = self.context.match
     match:finishHand(result.winner, result.winType, nil, nil)
     self.context.sceneManager:change(self.context:resultScene())
 end
 
+---更新.
+---@param input InputManager 入力管理.
+---@param now number 現在時刻.
 function HandScene:update(input, now)
     local match = self.context.match
     local player = match:player()
@@ -90,6 +100,8 @@ function HandScene:update(input, now)
     end
 end
 
+---次の手を進める.
+---@param now number 現在時刻.
 function HandScene:drawNext(now)
     local tile, info = self.context.match:drawForPlayer()
     if not tile then self:showResult(info); return end

@@ -4,6 +4,11 @@ import "domain/MahjongRules"
 
 ScoreCalculator = {}
 
+---スコア計算.
+---@param hand number[] 手牌.
+---@param riichi boolean リーチしているかどうか.
+---@param doraIndicator number ドラ表示牌.
+---@return table|nil info 計算結果. 完成形でない場合はnil
 function ScoreCalculator.calculate(hand, riichi, doraIndicator)
     if not Rules.isCompleteShape(hand) then return nil end
 

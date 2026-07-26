@@ -1,15 +1,22 @@
 import "scenes/Scene"
 
+local gfx <const> = playdate.graphics
+
+---@class HelpScene: Scene ヘルプシーン.
+---@field super Scene 親クラス.
 HelpScene = class("HelpScene").extends(Scene) or HelpScene
 
+---更新.
+---@param input InputManager 入力管理.
+---@param now number 現在の時間.
 function HelpScene:update(input, now)
     if input:released("A") or input:released("B") or input:released("MENU") then
         self.context.sceneManager:change(self.context:titleScene())
     end
 end
 
+---描画.
 function HelpScene:draw()
-    local gfx = playdate.graphics
     gfx.drawText("HOW TO PLAY", 12, 8)
     gfx.drawText("A CUT / CONFIRM       B CANCEL", 12, 35)
     gfx.drawText("LEFT/RIGHT  SELECT TILE", 12, 55)
