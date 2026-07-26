@@ -10,7 +10,7 @@ import "domain/ScoreCalculator"
 import "domain/CpuStrategy"
 
 ---@class Match 対戦の状態を保持するオブジェクト.
-Match = class("Match").extends() or Match
+Match = class("Match").extends()
 
 local function shuffle(deck)
     for i = #deck, 2, -1 do

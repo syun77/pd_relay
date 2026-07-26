@@ -9,7 +9,7 @@ local gfx <const> = playdate.graphics
 
 ---@class HandScene: Scene 手牌シーン.
 ---@field super Scene 親クラス.
-HandScene = class("HandScene").extends(Scene) or HandScene
+HandScene = class("HandScene").extends(Scene)
 
 ---初期化.
 ---@param context GameContext 各種オブジェクトを保持するコンテキスト

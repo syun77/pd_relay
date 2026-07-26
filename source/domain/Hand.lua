@@ -1,5 +1,10 @@
+--[[
+	Hand.lua
+	@desc 手牌の状態を保持するオブジェクト.
+]]
+--SDK.
 import "CoreLibs/object"
-
+--App.
 import "domain/Tile"
 
 ---@class Hand 手牌の状態を保持するオブジェクト.
