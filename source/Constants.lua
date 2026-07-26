@@ -1,9 +1,15 @@
+---@enum CPU_TYPE CPUの種類.
+local CpuType = {
+	YUI = 1,
+	HAIDO = 2,
+}
+
 Constants = {
     Game = {
-        CPU_TYPE = {
-            YUI = 1,
-            HAIDO = 2,
-        },
+        CPU_TYPE = CpuType,
+		CPU_TYPE_FIRST = CpuType.YUI, -- 開始.
+		CPU_TYPE_LAST = CpuType.HAIDO, -- 終端.
+		
         PLAYER_ID = {
             HUMAN = 1,
             CPU = 2,

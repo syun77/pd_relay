@@ -1,5 +1,7 @@
 import "CoreLibs/object"
 
+---@class SceneManager シーン管理クラス.
+---@field current Scene 現在実行中のシーン.
 SceneManager = class("SceneManager").extends() or SceneManager
 
 function SceneManager:init()

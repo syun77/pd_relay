@@ -9,6 +9,7 @@ import "domain/MahjongRules"
 import "domain/ScoreCalculator"
 import "domain/CpuStrategy"
 
+---@class Match 対戦の状態を保持するオブジェクト.
 Match = class("Match").extends() or Match
 
 local function shuffle(deck)

@@ -12,6 +12,11 @@ import "scenes/HelpScene"
 import "scenes/HandScene"
 import "scenes/ResultScene"
 
+---@class Game ゲームのメインクラス.
+---@field input InputManager 入力管理.
+---@field sceneManager SceneManager シーン管理.
+---@field match Match? 対戦の状態を保持するオブジェクト.
+---@field context table 各種オブジェクトを保持するコンテキスト.
 Game = class("Game").extends() or Game
 
 -- 初期化.
@@ -36,8 +41,8 @@ function Game:init()
     self.sceneManager:change(TitleScene(self.context))
 end
 
--- 対戦開始.
--- @param cpuType CPUの種類.
+---対戦開始.
+---@param cpuType CPU_TYPE CPUの種類.
 function Game:startMatch(cpuType)
     self.match = Match(cpuType)
     self.context.match = self.match
@@ -45,12 +50,14 @@ function Game:startMatch(cpuType)
     self.sceneManager:change(HandScene(self.context))
 end
 
+---更新.
 function Game:update()
     local now = playdate.getCurrentTimeMilliseconds()
     self.input:update(now)
     self.sceneManager:update(self.input, now)
 end
 
+---描画.
 function Game:draw()
     playdate.graphics.clear()
     self.sceneManager:draw()
