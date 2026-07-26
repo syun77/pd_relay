@@ -1,4 +1,5 @@
 import "CoreLibs/object"
+import "Constants"
 
 InputManager = class("InputManager").extends() or InputManager
 
@@ -25,7 +26,11 @@ function InputManager:update(now)
         end
         if playdate.buttonJustReleased(button) then
             local held = now - (self.downAt[name] or now)
-            self.events[name] = { released = true, held = held, long = held >= 550 }
+            self.events[name] = {
+                released = true,
+                held = held,
+                long = held >= Constants.UI.INPUT.LONG_PRESS_MS,
+            }
             self.downAt[name] = nil
         end
     end

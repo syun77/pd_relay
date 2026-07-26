@@ -1,3 +1,4 @@
+import "Constants"
 import "domain/Tile"
 import "domain/MahjongRules"
 
@@ -8,7 +9,7 @@ function ScoreCalculator.calculate(hand, riichi, doraIndicator)
 
     local dora = 0
     if doraIndicator ~= nil then
-        local nextNumber = Tile.number(doraIndicator) % 9 + 1
+        local nextNumber = Tile.number(doraIndicator) % Constants.Game.TILE.TYPES_PER_SUIT + 1
         local nextTile = Tile.index(Tile.suit(doraIndicator), nextNumber)
         for _, tile in ipairs(hand) do
             if tile == nextTile then dora = dora + 1 end

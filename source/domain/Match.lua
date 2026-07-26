@@ -1,5 +1,6 @@
 import "CoreLibs/object"
 
+import "Constants"
 import "domain/Tile"
 import "domain/Hand"
 import "domain/Player"
@@ -19,18 +20,21 @@ end
 
 local function makeWall()
     local deck = {}
-    for tile = 0, 26 do
-        for _ = 1, 4 do table.insert(deck, tile) end
+    for tile = Constants.Game.TILE.MIN_INDEX, Constants.Game.TILE.MAX_INDEX do
+        for _ = 1, Constants.Game.TILE.COPIES_PER_TYPE do table.insert(deck, tile) end
     end
     shuffle(deck)
     return deck
 end
 
 function Match:init(cpuType)
-    self.cpuType = cpuType or 1
+    self.cpuType = cpuType or Constants.Game.CPU_TYPE.YUI
     self.handNumber = 1
-    self.dealer = 1
-    self.players = { Player(1, "YOU"), Player(2, "CPU") }
+    self.dealer = Constants.Game.PLAYER_ID.HUMAN
+    self.players = {
+        Player(Constants.Game.PLAYER_ID.HUMAN, Constants.Game.PLAYER_NAME.HUMAN),
+        Player(Constants.Game.PLAYER_ID.CPU, Constants.Game.PLAYER_NAME.CPU),
+    }
     self.wall = nil
     self.pressure = 0
     self.targetSuit = nil
@@ -42,11 +46,11 @@ function Match:init(cpuType)
 end
 
 function Match:player()
-    return self.players[1]
+    return self.players[Constants.Game.PLAYER_ID.HUMAN]
 end
 
 function Match:cpu()
-    return self.players[2]
+    return self.players[Constants.Game.PLAYER_ID.CPU]
 end
 
 function Match:score(playerId)
@@ -54,21 +58,30 @@ function Match:score(playerId)
 end
 
 function Match:resetScores()
-    self.players[1].score = 25000
-    self.players[2].score = 25000
+    self.players[Constants.Game.PLAYER_ID.HUMAN].score = Constants.Game.INITIAL_SCORE
+    self.players[Constants.Game.PLAYER_ID.CPU].score = Constants.Game.INITIAL_SCORE
 end
 
 function Match:startHand()
     self.wall = Wall(makeWall())
-    self.wall.position = 26
-    self.wall.endPosition = math.min(#self.wall.tiles, self.wall.position + 50)
+    self.wall.position = Constants.Game.WALL.DEAL_END_POSITION
+    self.wall.endPosition = math.min(
+        #self.wall.tiles,
+        self.wall.position + Constants.Game.WALL.PLAYABLE_TILES
+    )
     self.wall.doraIndicator = self.wall.tiles[self.wall.endPosition + 1] or self.wall.tiles[1]
 
     self:player():resetHand()
     self:cpu():resetHand()
     local player, cpu = self:player(), self:cpu()
-    for _ = 1, 13 do self.wall:draw(); player.hand:add(self.wall.tiles[self.wall.position]) end
-    for _ = 1, 13 do self.wall:draw(); cpu.hand:add(self.wall.tiles[self.wall.position]) end
+    for _ = 1, Constants.Game.HAND.STARTING_TILES do
+        self.wall:draw()
+        player.hand:add(self.wall.tiles[self.wall.position])
+    end
+    for _ = 1, Constants.Game.HAND.STARTING_TILES do
+        self.wall:draw()
+        cpu.hand:add(self.wall.tiles[self.wall.position])
+    end
 
     self.pressure = 0
     self.targetSuit = nil
@@ -83,7 +96,7 @@ end
 function Match:drawForPlayer()
     local player = self:player()
     if self.wall:remaining() <= 0 then
-        return nil, { winner = 0, winType = "DRAW", points = 0 }
+        return nil, { winner = Constants.Game.PLAYER_ID.DRAW, winType = "DRAW", points = 0 }
     end
 
     self.reverseSnapshot = {
@@ -109,7 +122,7 @@ end
 
 function Match:playerDiscard(index, riichi)
     local player, cpu = self:player(), self:cpu()
-    if #player.hand.tiles ~= 14 then return nil, "INVALID_HAND" end
+    if #player.hand.tiles ~= Constants.Game.HAND.COMPLETE_TILES then return nil, "INVALID_HAND" end
     if riichi and not self:playerCanRiichi(index) then return nil, "RIICHI_NOT_AVAILABLE" end
 
     local discard = player.hand:discardAt(index)
@@ -141,9 +154,9 @@ end
 
 function Match:cpuTurn()
     local player, cpu = self:player(), self:cpu()
-    if self.cpuType == 2 and not self.cpuAbilityUsed then
+    if self.cpuType == Constants.Game.CPU_TYPE.HAIDO and not self.cpuAbilityUsed then
         self.cpuAbilityUsed = true
-        self.targetSuit = math.random(1, 3)
+        self.targetSuit = math.random(1, Constants.Game.TILE.SUIT_COUNT)
         for i = self.wall.position + 1, self.wall.endPosition do
             if Tile.suit(self.wall.tiles[i]) == self.targetSuit then
                 self.wall.tiles[self.wall.position + 1], self.wall.tiles[i] = self.wall.tiles[i], self.wall.tiles[self.wall.position + 1]
@@ -171,11 +184,19 @@ end
 
 function Match:finishHand(winner, winType, winTile, info)
     local points = 0
-    if info then points = math.min(8000, math.max(1000, 1000 * (2 ^ math.max(0, info.han - 1)))) end
-    if winner == 1 then
+    if info then
+        points = math.min(
+            Constants.Game.SCORE.MAX_POINTS,
+            math.max(
+                Constants.Game.SCORE.MIN_POINTS,
+                Constants.Game.SCORE.BASE_POINTS * (2 ^ math.max(0, info.han - 1))
+            )
+        )
+    end
+    if winner == Constants.Game.PLAYER_ID.HUMAN then
         self:player().score = self:player().score + points
         self:cpu().score = self:cpu().score - points
-    elseif winner == 2 then
+    elseif winner == Constants.Game.PLAYER_ID.CPU then
         self:player().score = self:player().score - points
         self:cpu().score = self:cpu().score + points
     end
@@ -192,8 +213,10 @@ end
 
 function Match:advanceHand()
     local result = self.lastResult
-    if self.handNumber >= 4 then return false end
-    if result and result.winner ~= 0 and result.winner == self.dealer then self.dealer = 3 - self.dealer end
+    if self.handNumber >= Constants.Game.HANDS_PER_MATCH then return false end
+    if result and result.winner ~= Constants.Game.PLAYER_ID.DRAW and result.winner == self.dealer then
+        self.dealer = Constants.Game.PLAYER_ID.HUMAN + Constants.Game.PLAYER_ID.CPU - self.dealer
+    end
     self.handNumber = self.handNumber + 1
     self:startHand()
     return true
@@ -203,7 +226,7 @@ function Match:updatePressure()
     local cpu = self:cpu()
     local counts = Rules.countsFor(cpu.hand.tiles)
     local value = 0
-    for i = 0, 26 do
+    for i = Constants.Game.TILE.MIN_INDEX, Constants.Game.TILE.MAX_INDEX do
         if counts[i] >= 2 then value = value + 1 end
         if counts[i] >= 3 then value = value + 1 end
         local number = Tile.number(i)
@@ -215,7 +238,14 @@ function Match:updatePressure()
             if Tile.suit(tile) == self.targetSuit then value = value + 1 end
         end
     end
-    self.pressure = math.min(5, math.max(0, math.floor(value / 4) + (self.cpuAbilityUsed and 1 or 0)))
+    self.pressure = math.min(
+        Constants.Game.PRESSURE.MAX,
+        math.max(
+            Constants.Game.PRESSURE.MIN,
+            math.floor(value / Constants.Game.PRESSURE.VALUE_PER_LEVEL)
+                + (self.cpuAbilityUsed and Constants.Game.PRESSURE.ABILITY_BONUS or 0)
+        )
+    )
 end
 
 return Match

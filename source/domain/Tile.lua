@@ -1,18 +1,20 @@
+import "Constants"
+
 Tile = {}
 
 Tile.suitNames = { "M", "P", "S" }
 Tile.suitNamesLong = { "MAN", "PIN", "SOU" }
 
 function Tile.suit(tile)
-    return math.floor(tile / 9) + 1
+    return math.floor(tile / Constants.Game.TILE.TYPES_PER_SUIT) + 1
 end
 
 function Tile.number(tile)
-    return tile % 9 + 1
+    return tile % Constants.Game.TILE.TYPES_PER_SUIT + 1
 end
 
 function Tile.index(suit, number)
-    return (suit - 1) * 9 + number - 1
+    return (suit - 1) * Constants.Game.TILE.TYPES_PER_SUIT + number - 1
 end
 
 function Tile.text(tile)

@@ -1,3 +1,4 @@
+import "Constants"
 import "scenes/Scene"
 import "domain/Tile"
 import "domain/MahjongRules"
@@ -42,13 +43,13 @@ function HandScene:update(input, now)
         self.selected = math.max(1, math.min(#player.hand.tiles, self.selected))
         if input:released("A") then
             local discard, event = match:playerDiscard(self.selected, input:event("A").long)
-            if not discard then self:showToast(event, now + 1100)
+            if not discard then self:showToast(event, now + Constants.UI.TIMING.ERROR_TOAST_MS)
             elseif event.type == "CPU_RON" then
-                match:finishHand(2, "RON", event.tile, event.info)
+                match:finishHand(Constants.Game.PLAYER_ID.CPU, "RON", event.tile, event.info)
                 self.context.sceneManager:change(self.context.resultScene())
             else
                 self.state = "CPU"
-                self.deadline = now + 350
+                self.deadline = now + Constants.UI.TIMING.CPU_TURN_DELAY_MS
             end
         elseif input:released("B") and input:event("B").long then
             self.state = "ABILITY"
@@ -56,24 +57,29 @@ function HandScene:update(input, now)
     elseif self.state == "ABILITY" then
         if input:released("A") then
             local ok, message = match:useReverse()
-            if ok then self:enter() else self:showToast(message, now + 1200); self.state = "PLAYER" end
+            if ok then
+                self:enter()
+            else
+                self:showToast(message, now + Constants.UI.TIMING.ABILITY_TOAST_MS)
+                self.state = "PLAYER"
+            end
         elseif input:released("B") then self.state = "PLAYER" end
     elseif self.state == "TSUMO" then
         if input:released("A") then
             local info = ScoreCalculator.calculate(player.hand.tiles, player.hand.riichi, match.wall.doraIndicator)
-            match:finishHand(1, "TSUMO", player.hand.tiles[#player.hand.tiles], info)
+            match:finishHand(Constants.Game.PLAYER_ID.HUMAN, "TSUMO", player.hand.tiles[#player.hand.tiles], info)
             self.context.sceneManager:change(self.context.resultScene())
         elseif input:released("B") then self.state = "PLAYER" end
     elseif self.state == "RON" then
         if input:released("A") then
             local info = ScoreCalculator.calculate(Rules.appendTile(player.hand.tiles, self.pendingTile), player.hand.riichi, match.wall.doraIndicator)
-            match:finishHand(1, "RON", self.pendingTile, info)
+            match:finishHand(Constants.Game.PLAYER_ID.HUMAN, "RON", self.pendingTile, info)
             self.context.sceneManager:change(self.context.resultScene())
         elseif input:released("B") then self.state = "PLAYER"; self:drawNext(now) end
     elseif self.state == "CPU" and now >= self.deadline and not input:pressed("B") then
         local event = match:cpuTurn()
         if event.type == "CPU_TSUMO" then
-            match:finishHand(2, "TSUMO", event.tile, event.info)
+            match:finishHand(Constants.Game.PLAYER_ID.CPU, "TSUMO", event.tile, event.info)
             self.context.sceneManager:change(self.context.resultScene())
         elseif event.type == "RON" then
             self.pendingTile = event.tile
@@ -90,7 +96,7 @@ function HandScene:drawNext(now)
     self.state = info and "TSUMO" or "PLAYER"
     if self.state == "PLAYER" and self.context.match:player().hand.riichi then
         self.selected = #self.context.match:player().hand.tiles
-        self.deadline = now + 500
+        self.deadline = now + Constants.UI.TIMING.RIICHI_DRAW_DELAY_MS
     end
 end
 
@@ -102,21 +108,39 @@ function HandScene:draw()
     local gfx, match = playdate.graphics, self.context.match
     local player, cpu = match:player(), match:cpu()
     gfx.drawText("TSUKIKAGE JANTO", 8, 3)
-    gfx.drawText("E" .. match.handNumber .. "  " .. (match.dealer == 1 and "OYA" or "CPU OYA"), 160, 3)
-    gfx.drawText("YOU " .. match:score(1), 8, 17); gfx.drawText("CPU " .. match:score(2), 108, 17)
+    gfx.drawText("E" .. match.handNumber .. "  " .. (match.dealer == Constants.Game.PLAYER_ID.HUMAN and "OYA" or "CPU OYA"), 160, 3)
+    gfx.drawText("YOU " .. match:score(Constants.Game.PLAYER_ID.HUMAN), 8, 17)
+    gfx.drawText("CPU " .. match:score(Constants.Game.PLAYER_ID.CPU), 108, 17)
     gfx.drawText("D:" .. Tile.text(match.wall.doraIndicator or 0), 306, 3)
     gfx.drawText("CPU", 8, 34)
-    for i = 1, 13 do self:drawBack(48 + (i - 1) * 25, 31, 20, 25) end
+    for i = 1, Constants.UI.HAND.CPU_TILE_COUNT do
+        self:drawBack(
+            Constants.UI.HAND.CPU_TILE_START_X + (i - 1) * Constants.UI.HAND.CPU_TILE_GAP,
+            31,
+            20,
+            25
+        )
+    end
     gfx.drawText("CPU RIVER", 8, 59); self:drawRiver(cpu.hand.river, 75)
-    gfx.drawLine(0, 113, 399, 113)
+    gfx.drawLine(0, 113, Constants.UI.SCREEN.WIDTH - 1, 113)
     local center = self.state == "PLAYER" and "CHOOSE A TILE" or self.state == "TSUMO" and "TSUMO?  A: YES   B: NO" or self.state == "RON" and "RON?  A: YES   B: NO" or self.state == "CPU" and "CPU THINKING..." or "ABILITY: A REVERSE  B CLOSE"
-    gfx.drawTextAligned(center, 200, 115, kTextAlignment.center)
+    gfx.drawTextAligned(center, Constants.UI.SCREEN.CENTER_X, 115, kTextAlignment.center)
     gfx.drawText("YOU RIVER", 8, 135); self:drawRiver(player.hand.river, 150)
-    for i, tile in ipairs(player.hand.tiles) do self:drawTile(tile, 7 + (i - 1) * 28, 188, 25, 30, i == self.selected and self.state == "PLAYER") end
+    for i, tile in ipairs(player.hand.tiles) do
+        self:drawTile(
+            tile,
+            Constants.UI.HAND.PLAYER_TILE_START_X + (i - 1) * Constants.UI.HAND.PLAYER_TILE_GAP,
+            188,
+            25,
+            30,
+            i == self.selected and self.state == "PLAYER"
+        )
+    end
     gfx.drawText(self.state == "PLAYER" and "A CUT   A-HOLD RIICHI   B-HOLD ABILITY" or "A NEXT   B-HOLD REVERSE", 8, 224)
     if self.toast ~= "" and playdate.getCurrentTimeMilliseconds() < self.toastUntil then
         gfx.fillRect(48, 100, 304, 32); gfx.setImageDrawMode(gfx.kDrawModeFillWhite)
-        gfx.drawTextAligned(self.toast, 200, 111, kTextAlignment.center); gfx.setImageDrawMode(gfx.kDrawModeCopy)
+        gfx.drawTextAligned(self.toast, Constants.UI.SCREEN.CENTER_X, 111, kTextAlignment.center)
+        gfx.setImageDrawMode(gfx.kDrawModeCopy)
     end
 end
 
@@ -129,8 +153,16 @@ function HandScene:drawBack(x, y, w, h)
 end
 
 function HandScene:drawRiver(river, y)
-    for i = 1, math.min(#river, 18) do
-        self:drawTile(river[i], 8 + ((i - 1) % 9) * 29, y + math.floor((i - 1) / 9) * 22, 25, 18, false)
+    for i = 1, math.min(#river, Constants.UI.HAND.RIVER_MAX_TILES) do
+        self:drawTile(
+            river[i],
+            Constants.UI.HAND.RIVER_START_X
+                + ((i - 1) % Constants.UI.HAND.RIVER_COLUMNS) * Constants.UI.HAND.RIVER_TILE_GAP_X,
+            y + math.floor((i - 1) / Constants.UI.HAND.RIVER_COLUMNS) * Constants.UI.HAND.RIVER_ROW_GAP,
+            25,
+            18,
+            false
+        )
     end
 end
 

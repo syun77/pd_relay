@@ -1,10 +1,11 @@
+import "Constants"
 import "domain/Tile"
 
 Rules = {}
 
 function Rules.countsFor(hand)
     local counts = {}
-    for i = 0, 26 do counts[i] = 0 end
+    for i = Constants.Game.TILE.MIN_INDEX, Constants.Game.TILE.MAX_INDEX do counts[i] = 0 end
     for _, tile in ipairs(hand) do counts[tile] = counts[tile] + 1 end
     return counts
 end
@@ -24,10 +25,10 @@ function Rules.appendTile(hand, tile)
 end
 
 function Rules.isChiitoitsu(hand)
-    if #hand ~= 14 then return false end
+    if #hand ~= Constants.Game.HAND.COMPLETE_TILES then return false end
     local counts = Rules.countsFor(hand)
     local pairs = 0
-    for i = 0, 26 do
+    for i = Constants.Game.TILE.MIN_INDEX, Constants.Game.TILE.MAX_INDEX do
         if counts[i] == 2 then pairs = pairs + 1
         elseif counts[i] ~= 0 then return false end
     end
@@ -35,7 +36,7 @@ function Rules.isChiitoitsu(hand)
 end
 
 function Rules.collectStandardDecompositions(hand, limit)
-    if #hand ~= 14 then return {} end
+    if #hand ~= Constants.Game.HAND.COMPLETE_TILES then return {} end
 
     local counts = Rules.countsFor(hand)
     local result = {}
@@ -54,7 +55,7 @@ function Rules.collectStandardDecompositions(hand, limit)
         end
 
         local first
-        for i = 0, 26 do
+        for i = Constants.Game.TILE.MIN_INDEX, Constants.Game.TILE.MAX_INDEX do
             if counts[i] > 0 then first = i; break end
         end
         if first == nil then return end
@@ -87,12 +88,13 @@ function Rules.collectStandardDecompositions(hand, limit)
         end
     end
 
-    walk(14, nil, {})
+    walk(Constants.Game.HAND.COMPLETE_TILES, nil, {})
     return result
 end
 
 function Rules.isCompleteShape(hand)
-    return #hand == 14 and (Rules.isChiitoitsu(hand) or #Rules.collectStandardDecompositions(hand, 1) > 0)
+    return #hand == Constants.Game.HAND.COMPLETE_TILES
+        and (Rules.isChiitoitsu(hand) or #Rules.collectStandardDecompositions(hand, 1) > 0)
 end
 
 function Rules.allSimple(hand)
@@ -126,7 +128,7 @@ function Rules.sequencePair(decomposition)
 end
 
 function Rules.hasShapeDraw(hand13)
-    for tile = 0, 26 do
+    for tile = Constants.Game.TILE.MIN_INDEX, Constants.Game.TILE.MAX_INDEX do
         if Rules.isCompleteShape(Rules.appendTile(hand13, tile)) then return true end
     end
     return false

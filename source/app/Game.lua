@@ -1,5 +1,9 @@
-import "CoreLibs/object"
+--[[
 
+]]
+-- SDK.
+import "CoreLibs/object"
+-- App.
 import "domain/Match"
 import "input/InputManager"
 import "app/SceneManager"
@@ -10,10 +14,14 @@ import "scenes/ResultScene"
 
 Game = class("Game").extends() or Game
 
+-- 初期化.
 function Game:init()
+	-- 入力管理.
     self.input = InputManager()
+	-- シーン管理.
     self.sceneManager = SceneManager()
     self.match = nil
+	-- 各種オブジェクトを保持するコンテキスト.
     self.context = {
         input = self.input,
         sceneManager = self.sceneManager,
@@ -23,9 +31,13 @@ function Game:init()
         handScene = function() return HandScene(self.context) end,
         resultScene = function() return ResultScene(self.context) end
     }
+
+	-- タイトルシーンに遷移.
     self.sceneManager:change(TitleScene(self.context))
 end
 
+-- 対戦開始.
+-- @param cpuType CPUの種類.
 function Game:startMatch(cpuType)
     self.match = Match(cpuType)
     self.context.match = self.match
