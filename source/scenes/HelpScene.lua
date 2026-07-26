@@ -4,7 +4,7 @@ HelpScene = class("HelpScene").extends(Scene) or HelpScene
 
 function HelpScene:update(input, now)
     if input:released("A") or input:released("B") or input:released("MENU") then
-        self.context.sceneManager:change(self.context.titleScene())
+        self.context.sceneManager:change(self.context:titleScene())
     end
 end
 

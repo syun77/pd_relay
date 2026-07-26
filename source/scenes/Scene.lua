@@ -1,11 +1,11 @@
 import "CoreLibs/object"
 
 ---@class Scene シーンの基底クラス.
----@field context table 各種オブジェクトを保持するコンテキスト.
+---@field context GameContext 各種オブジェクトを保持するコンテキスト.
 Scene = class("Scene").extends() or Scene
 
 ---初期化.
----@param context table 各種オブジェクトを保持するコンテキスト.
+---@param context GameContext 各種オブジェクトを保持するコンテキスト.
 function Scene:init(context)
     self.context = context
 end

@@ -30,11 +30,14 @@ function TitleScene:update(input, now)
     elseif input:pressed("DOWN") or input:pressed("RIGHT") then
         self.selected = math.min(Constants.UI.TITLE.LAST_ITEM, self.selected + 1)
     elseif input:released("MENU") then
-        self.context.sceneManager:change(self.context.helpScene())
+        self.context.sceneManager:change(self.context:helpScene())
     elseif input:released("A") then
+		-- 項目実行.
         if self.selected == Constants.UI.TITLE.LAST_ITEM then
-            self.context.sceneManager:change(self.context.helpScene())
+			-- ヘルプシーンに遷移.
+            self.context.sceneManager:change(self.context:helpScene())
         else
+			-- 対戦開始.
             self.context:startMatch(self.selected)
         end
     end

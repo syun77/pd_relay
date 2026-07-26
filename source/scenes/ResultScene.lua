@@ -13,10 +13,10 @@ function ResultScene:update(input, now)
     local match = self.context.match
     if input:released("A") then
         if match.handNumber >= Constants.Game.HANDS_PER_MATCH then
-            self.context.sceneManager:change(self.context.titleScene())
+            self.context.sceneManager:change(self.context:titleScene())
         else
             match:advanceHand()
-            self.context.sceneManager:change(self.context.handScene())
+            self.context.sceneManager:change(self.context:handScene())
         end
     end
 end

@@ -29,14 +29,14 @@ end
 function HandScene:showResult(result)
     local match = self.context.match
     match:finishHand(result.winner, result.winType, nil, nil)
-    self.context.sceneManager:change(self.context.resultScene())
+    self.context.sceneManager:change(self.context:resultScene())
 end
 
 function HandScene:update(input, now)
     local match = self.context.match
     local player = match:player()
 
-    if input:released("MENU") then self.context.sceneManager:change(self.context.helpScene()); return end
+    if input:released("MENU") then self.context.sceneManager:change(self.context:helpScene()); return end
     if self.state == "PLAYER" then
         if input:pressed("LEFT") then self.selected = self.selected - 1 end
         if input:pressed("RIGHT") then self.selected = self.selected + 1 end
@@ -46,7 +46,7 @@ function HandScene:update(input, now)
             if not discard then self:showToast(event, now + Constants.UI.TIMING.ERROR_TOAST_MS)
             elseif event.type == "CPU_RON" then
                 match:finishHand(Constants.Game.PLAYER_ID.CPU, "RON", event.tile, event.info)
-                self.context.sceneManager:change(self.context.resultScene())
+                self.context.sceneManager:change(self.context:resultScene())
             else
                 self.state = "CPU"
                 self.deadline = now + Constants.UI.TIMING.CPU_TURN_DELAY_MS
@@ -68,19 +68,19 @@ function HandScene:update(input, now)
         if input:released("A") then
             local info = ScoreCalculator.calculate(player.hand.tiles, player.hand.riichi, match.wall.doraIndicator)
             match:finishHand(Constants.Game.PLAYER_ID.HUMAN, "TSUMO", player.hand.tiles[#player.hand.tiles], info)
-            self.context.sceneManager:change(self.context.resultScene())
+            self.context.sceneManager:change(self.context:resultScene())
         elseif input:released("B") then self.state = "PLAYER" end
     elseif self.state == "RON" then
         if input:released("A") then
             local info = ScoreCalculator.calculate(Rules.appendTile(player.hand.tiles, self.pendingTile), player.hand.riichi, match.wall.doraIndicator)
             match:finishHand(Constants.Game.PLAYER_ID.HUMAN, "RON", self.pendingTile, info)
-            self.context.sceneManager:change(self.context.resultScene())
+            self.context.sceneManager:change(self.context:resultScene())
         elseif input:released("B") then self.state = "PLAYER"; self:drawNext(now) end
     elseif self.state == "CPU" and now >= self.deadline and not input:pressed("B") then
         local event = match:cpuTurn()
         if event.type == "CPU_TSUMO" then
             match:finishHand(Constants.Game.PLAYER_ID.CPU, "TSUMO", event.tile, event.info)
-            self.context.sceneManager:change(self.context.resultScene())
+            self.context.sceneManager:change(self.context:resultScene())
         elseif event.type == "RON" then
             self.pendingTile = event.tile
             self.state = "RON"
