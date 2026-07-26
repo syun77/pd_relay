@@ -16,7 +16,8 @@ function Wall:init(tiles)
     self.doraIndicator = nil
 end
 
----描画.
+---牌を積もる.
+---@return number|nil tile 積もった牌.
 function Wall:draw()
     if self.position >= self.endPosition then return nil end
     self.position = self.position + 1

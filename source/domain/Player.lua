@@ -9,6 +9,9 @@ import "domain/Hand"
 ---@field score number スコア.
 Player = class("Player").extends() or Player
 
+---手牌を初期化.
+---@param id PLAYER_ID プレイヤーID.
+---@param name string プレイヤー名.
 function Player:init(id, name)
     self.id = id
     self.name = name
@@ -16,6 +19,7 @@ function Player:init(id, name)
     self.score = Constants.Game.INITIAL_SCORE
 end
 
+---手牌をリセットする.
 function Player:resetHand()
     self.hand:reset()
 end

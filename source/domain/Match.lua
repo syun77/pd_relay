@@ -10,8 +10,17 @@ import "domain/ScoreCalculator"
 import "domain/CpuStrategy"
 
 ---@class Match 対戦の状態を保持するオブジェクト.
-Match = class("Match").extends()
+---@field cpuType CPU_TYPE CPUの種類.
+---@field handNumber number 現在の手牌の番号.
+---@field dealer PLAYER_ID 親のプレイヤーID.
+---@field players Player[] プレイヤーの配列.
+---@field wall Wall 山.
+---@field pressure number CPUの手牌の圧力.
+---@field targetSuit Suit? CPUの手牌の圧力を上げるためのターゲットスーツ. CPUの能力を使用していない場合はnil.
+Match = class("Match").extends() or Match
 
+---シャッフルする.
+---@param deck number[] シャッフルする牌の配列.
 local function shuffle(deck)
     for i = #deck, 2, -1 do
         local j = math.random(i)
@@ -19,15 +28,21 @@ local function shuffle(deck)
     end
 end
 
+---山を作る.
+---@return number[] 山の牌の配列.
 local function makeWall()
     local deck = {}
     for tile = Constants.Game.TILE.MIN_INDEX, Constants.Game.TILE.PLAYABLE_MAX_INDEX do
-        for _ = 1, Constants.Game.TILE.COPIES_PER_TYPE do table.insert(deck, tile) end
+        for _ = 1, Constants.Game.TILE.COPIES_PER_TYPE do
+			table.insert(deck, tile)
+		end
     end
     shuffle(deck)
     return deck
 end
 
+---初期化.
+---@param cpuType CPU_TYPE CPUの種類.
 function Match:init(cpuType)
     self.cpuType = cpuType or Constants.Game.CPU_TYPE.YUI
     self.handNumber = 1
@@ -46,23 +61,32 @@ function Match:init(cpuType)
     self.lastResult = nil
 end
 
+---プレイヤーを取得.
+---@return Player プレイヤー.
 function Match:player()
     return self.players[Constants.Game.PLAYER_ID.HUMAN]
 end
 
+---CPUを取得.
+---@return Player CPU.
 function Match:cpu()
     return self.players[Constants.Game.PLAYER_ID.CPU]
 end
 
+---点数を取得.
+---@param playerId PLAYER_ID プレイヤーID.
+---@return number スコア.
 function Match:score(playerId)
     return self.players[playerId].score
 end
 
+---点数をリセット.
 function Match:resetScores()
     self.players[Constants.Game.PLAYER_ID.HUMAN].score = Constants.Game.INITIAL_SCORE
     self.players[Constants.Game.PLAYER_ID.CPU].score = Constants.Game.INITIAL_SCORE
 end
 
+---手牌を配る.
 function Match:startHand()
     self.wall = Wall(makeWall())
     self.wall.position = Constants.Game.WALL.DEAL_END_POSITION
@@ -119,11 +143,19 @@ function Match:drawForPlayer()
     return tile, info
 end
 
+---リーチできるかどうか.
+---@param index number 捨てる牌のインデックス.
+---@return boolean リーチできるかどうか.
 function Match:playerCanRiichi(index)
     return not self.reverseUsed and not self:player().hand.riichi
         and Rules.canRiichiAfterDiscard(self:player().hand.tiles, index)
 end
 
+---プレイヤーが牌を捨てる.
+---@param index number 捨てる牌のインデックス.
+---@param riichi boolean リーチするかどうか.
+---@return number|nil discard 捨てた牌.
+---@return table|nil info 捨てた後の情報.
 function Match:playerDiscard(index, riichi)
     local player, cpu = self:player(), self:cpu()
     if #player.hand.tiles ~= Constants.Game.HAND.COMPLETE_TILES then return nil, "INVALID_HAND" end
@@ -142,6 +174,9 @@ function Match:playerDiscard(index, riichi)
     return discard, { type = "CPU_TURN" }
 end
 
+---リバースを使用する.
+---@return boolean 成功したかどうか.
+---@return string|nil エラーの理由.
 function Match:useReverse()
     if self.reverseUsed then return false, "REVERSE_USED" end
     if not self.reverseReady or not self.reverseSnapshot then return false, "CUT_FIRST" end
@@ -156,6 +191,7 @@ function Match:useReverse()
     return true
 end
 
+---CPUのターン処理
 function Match:cpuTurn()
     local player, cpu = self:player(), self:cpu()
     if self.cpuType == Constants.Game.CPU_TYPE.HAIDO and not self.cpuAbilityUsed then
@@ -186,6 +222,12 @@ function Match:cpuTurn()
     return { type = "PLAYER_DRAW" }
 end
 
+---手牌を終了する.
+---@param winner PLAYER_ID 勝者のプレイヤーID.
+---@param winType string 勝利の種類.
+---@param winTile number 勝利の牌.
+---@param info table|nil 勝利の情報.
+---@return table 最終結果.
 function Match:finishHand(winner, winType, winTile, info)
     local points = 0
     if info then
@@ -215,6 +257,8 @@ function Match:finishHand(winner, winType, winTile, info)
     return self.lastResult
 end
 
+---次の手牌に進める.
+---@return boolean 進めたかどうか.
 function Match:advanceHand()
     local result = self.lastResult
     if self.handNumber >= Constants.Game.HANDS_PER_MATCH then return false end
@@ -226,6 +270,7 @@ function Match:advanceHand()
     return true
 end
 
+---CPUの手牌の圧力を更新する.
 function Match:updatePressure()
     local cpu = self:cpu()
     local counts = Rules.countsFor(cpu.hand.tiles)

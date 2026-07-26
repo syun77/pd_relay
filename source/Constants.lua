@@ -4,6 +4,13 @@ local CpuType = {
 	HAIDO = 2,
 }
 
+---@enum PLAYER_ID プレイヤーID.
+local PlayerID = {
+	HUMAN = 1,
+	CPU = 2,
+	DRAW = 0,
+}
+
 ---@enum Suit 牌のスーツ.
 local Suit = {
     MAN = 1,   -- 萬子.
@@ -53,11 +60,8 @@ Constants = {
             [Honor.RED_DRAGON] = "C",
         },
 
-        PLAYER_ID = {
-            HUMAN = 1,
-            CPU = 2,
-            DRAW = 0,
-        },
+        PLAYER_ID = PlayerID,
+		
         PLAYER_NAME = {
             HUMAN = "YOU",
             CPU = "CPU",

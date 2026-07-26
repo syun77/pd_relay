@@ -7,7 +7,7 @@ local gfx <const> = playdate.graphics
 
 ---@class ResultScene: Scene 結果シーン.
 ---@field super Scene 親クラス.
-ResultScene = class("ResultScene").extends(Scene)
+ResultScene = class("ResultScene").extends(Scene) or ResultScene
 
 ---初期化.
 function ResultScene:init(context)
