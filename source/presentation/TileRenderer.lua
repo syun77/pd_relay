@@ -1,26 +1,54 @@
+--[[
+========================================================
+	手牌描画モジュール.
+========================================================
+]]
 import "domain/Tile"
 
-TileRenderer = {}
 local gfx <const> = playdate.graphics
 
+---@class TileRenderer 牌の描画を行うモジュール.
+TileRenderer = {}
+
+---筒子の点の配置.
 local pipLayouts = {
-    [1]={{2,2}}, [2]={{1,1},{3,3}}, [3]={{1,1},{2,2},{3,3}},
-    [4]={{1,1},{3,1},{1,3},{3,3}}, [5]={{1,1},{3,1},{2,2},{1,3},{3,3}},
+    [1]={{2,2}},
+	[2]={{1,1},{3,3}},
+	[3]={{1,1},{2,2},{3,3}},
+    [4]={{1,1},{3,1},{1,3},{3,3}},
+	[5]={{1,1},{3,1},{2,2},{1,3},{3,3}},
     [6]={{1,1},{3,1},{1,2},{3,2},{1,3},{3,3}},
     [7]={{1,1},{3,1},{2,2},{1,3},{3,3},{1,4},{3,4}},
     [8]={{1,1},{3,1},{1,2},{3,2},{1,3},{3,3},{1,4},{3,4}},
     [9]={{1,1},{2,1},{3,1},{1,2},{2,2},{3,2},{1,3},{2,3},{3,3}}
 }
 
+---萬子の描画.
+---@param number number 萬子の数値.
+---@param x number 描画位置X.
+---@param y number 描画位置Y.
+---@param w number 幅.
+---@param h number 高さ.
+---@param small boolean 小さいサイズで描画するかどうか.
 local function drawMan(number, x, y, w, h, small)
     local cx, top = x + math.floor(w / 2), y + (small and 9 or 13)
     local span, foot = small and 4 or 6, small and 8 or 10
     gfx.drawTextAligned(tostring(number), cx, y + (small and 0 or 1), kTextAlignment.center)
-    gfx.drawLine(cx-span, top, cx+span, top); gfx.drawLine(cx, top-2, cx, top+7)
-    gfx.drawLine(cx-span+1, top+3, cx+span-1, top+3); gfx.drawLine(cx-span, top+7, cx+span, top+7)
-    gfx.drawLine(cx-span+2, top+7, cx-span+2, top+foot); gfx.drawLine(cx+span-2, top+7, cx+span-2, top+foot)
+    gfx.drawLine(cx-span, top, cx+span, top);
+	gfx.drawLine(cx, top-2, cx, top+7)
+    gfx.drawLine(cx-span+1, top+3, cx+span-1, top+3);
+	gfx.drawLine(cx-span, top+7, cx+span, top+7)
+    gfx.drawLine(cx-span+2, top+7, cx-span+2, top+foot);
+	gfx.drawLine(cx+span-2, top+7, cx+span-2, top+foot)
 end
 
+---筒子の描画.
+---@param number number 筒子の数値.
+---@param x number 描画位置X.
+---@param y number 描画位置Y.
+---@param w number 幅.
+---@param h number 高さ.
+---@param small boolean 小さいサイズで描画するかどうか.
 local function drawPin(number, x, y, w, h, small)
     local points = pipLayouts[number]
     local rows = (number >= 7 and number <= 8) and 4 or 3
@@ -37,6 +65,13 @@ local function drawPin(number, x, y, w, h, small)
     end
 end
 
+---索子の描画.
+---@param number number 索子の数値.
+---@param x number 描画位置X.
+---@param y number 描画位置Y.
+---@param w number 幅.
+---@param h number 高さ.
+---@param small boolean 小さいサイズで描画するかどうか.
 local function drawSou(number, x, y, w, h, small)
     local cols = number <= 3 and number or 3
     local rows = math.ceil(number / cols)
@@ -52,21 +87,59 @@ local function drawSou(number, x, y, w, h, small)
     end
 end
 
+---描画.
+---@param tile number 牌の種類.
+---@param x number 描画位置X.
+---@param y number 描画位置Y.
+---@param w number 幅.
+---@param h number 高さ.
+---@param small boolean 小さいサイズで描画するかどうか.
+---@param selected boolean 選択されているかどうか.
 function TileRenderer.draw(tile, x, y, w, h, small, selected)
-    if selected then gfx.fillRoundRect(x - 2, y - 5, w + 4, h + 7, 4) end
-    gfx.fillRoundRect(x + 2, y + 3, w, h, 3); gfx.setColor(gfx.kColorWhite); gfx.fillRoundRect(x, y, w, h, 3)
-    gfx.setColor(gfx.kColorBlack); gfx.drawRoundRect(x, y, w, h, 3); gfx.drawRoundRect(x + 1, y + 1, w - 2, h - 2, 2)
+    if selected then
+		-- 選択枠の描画.
+		gfx.fillRoundRect(x - 2, y - 5, w + 4, h + 7, 4)
+	end
+
+	-- 牌の枠の描画.
+    gfx.fillRoundRect(x + 2, y + 3, w, h, 3);
+	gfx.setColor(gfx.kColorWhite);
+	gfx.fillRoundRect(x, y, w, h, 3)
+    gfx.setColor(gfx.kColorBlack);
+	gfx.drawRoundRect(x, y, w, h, 3);
+	gfx.drawRoundRect(x + 1, y + 1, w - 2, h - 2, 2)
+
     local suit, number = Tile.suit(tile), Tile.number(tile)
-    if suit == 1 then drawMan(number, x, y, w, h, small)
-    elseif suit == 2 then drawPin(number, x, y, w, h, small)
-    else drawSou(number, x, y, w, h, small) end
+    if suit == 1 then
+		-- 萬子の描画.
+		drawMan(number, x, y, w, h, small)
+    elseif suit == 2 then
+		-- 筒子の描画.
+		drawPin(number, x, y, w, h, small)
+    else
+		-- 索子の描画.
+		drawSou(number, x, y, w, h, small)
+	end
 end
 
+---牌の裏側の描画.
+---@param x number 描画位置X.
+---@param y number 描画位置Y.
+---@param w number 幅.
+---@param h number 高さ.
 function TileRenderer.drawBack(x, y, w, h)
-    gfx.fillRoundRect(x + 2, y + 3, w, h, 3); gfx.setColor(gfx.kColorWhite); gfx.fillRoundRect(x, y, w, h, 3)
-    gfx.setColor(gfx.kColorBlack); gfx.drawRoundRect(x, y, w, h, 3); gfx.fillRect(x + 4, y + 4, w - 8, h - 8)
+    gfx.fillRoundRect(x + 2, y + 3, w, h, 3);
+	gfx.setColor(gfx.kColorWhite);
+	gfx.fillRoundRect(x, y, w, h, 3)
+    gfx.setColor(gfx.kColorBlack);
+	gfx.drawRoundRect(x, y, w, h, 3);
+	gfx.fillRect(x + 4, y + 4, w - 8, h - 8)
     gfx.setColor(gfx.kColorWhite)
-    for yy = y + 6, y + h - 6, 4 do for xx = x + 6, x + w - 6, 4 do gfx.fillRect(xx, yy, 1, 1) end end
+    for yy = y + 6, y + h - 6, 4 do
+		for xx = x + 6, x + w - 6, 4 do
+			gfx.fillRect(xx, yy, 1, 1)
+		end
+	end
     gfx.setColor(gfx.kColorBlack)
 end
 

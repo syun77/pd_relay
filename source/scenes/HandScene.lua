@@ -5,6 +5,8 @@ import "domain/MahjongRules"
 import "domain/ScoreCalculator"
 import "presentation/TileRenderer"
 
+local gfx <const> = playdate.graphics
+
 ---@class HandScene: Scene 手牌シーン.
 ---@field super Scene 親クラス.
 HandScene = class("HandScene").extends(Scene) or HandScene
@@ -116,8 +118,9 @@ function HandScene:showToast(message, untilTime)
     self.toast, self.toastUntil = message or "", untilTime
 end
 
+---描画.
 function HandScene:draw()
-    local gfx, match = playdate.graphics, self.context.match
+    local match = self.context.match
     local player, cpu = match:player(), match:cpu()
     gfx.drawText("TSUKIKAGE JANTO", 8, 3)
     gfx.drawText("E" .. match.handNumber .. "  " .. (match.dealer == Constants.Game.PLAYER_ID.HUMAN and "OYA" or "CPU OYA"), 160, 3)
@@ -133,10 +136,13 @@ function HandScene:draw()
             25
         )
     end
-    gfx.drawText("CPU RIVER", 8, 59); self:drawRiver(cpu.hand.river, 75)
+	-- CPUの河(捨て牌)の描画.
+    gfx.drawText("CPU RIVER", 8, 59)
+	self:drawRiver(cpu.hand.river, 75)
     gfx.drawLine(0, 113, Constants.UI.SCREEN.WIDTH - 1, 113)
     local center = self.state == "PLAYER" and "CHOOSE A TILE" or self.state == "TSUMO" and "TSUMO?  A: YES   B: NO" or self.state == "RON" and "RON?  A: YES   B: NO" or self.state == "CPU" and "CPU THINKING..." or "ABILITY: A REVERSE  B CLOSE"
     gfx.drawTextAligned(center, Constants.UI.SCREEN.CENTER_X, 115, kTextAlignment.center)
+	-- プレイヤーの河(捨て牌)の描画.
     gfx.drawText("YOU RIVER", 8, 135); self:drawRiver(player.hand.river, 150)
     for i, tile in ipairs(player.hand.tiles) do
         self:drawTile(
@@ -156,14 +162,19 @@ function HandScene:draw()
     end
 end
 
+---牌の描画.
 function HandScene:drawTile(tile, x, y, w, h, selected)
     TileRenderer.draw(tile, x, y, w, h, w <= 25, selected)
 end
 
+---牌の裏側の描画.
 function HandScene:drawBack(x, y, w, h)
     TileRenderer.drawBack(x, y, w, h)
 end
 
+---捨て牌の描画.
+---@param river table 捨て牌の配列.
+---@param y number 描画位置Y.
 function HandScene:drawRiver(river, y)
     for i = 1, math.min(#river, Constants.UI.HAND.RIVER_MAX_TILES) do
         self:drawTile(
