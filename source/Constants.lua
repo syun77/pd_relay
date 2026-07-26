@@ -97,19 +97,45 @@ Constants = {
         },
     },
     UI = {
+		-- 解像度.
         SCREEN = {
             WIDTH = 400,
             HEIGHT = 240,
             CENTER_X = 200,
         },
         INPUT = {
-            LONG_PRESS_MS = 550,
+            LONG_PRESS_MS = 550, -- 長押し判定 (msec).
         },
         TIMING = {
             CPU_TURN_DELAY_MS = 350,
             RIICHI_DRAW_DELAY_MS = 500,
             ERROR_TOAST_MS = 1100,
             ABILITY_TOAST_MS = 1200,
+        },
+
+		-- 牌の描画サイズ.
+        TILE_SIZE = {
+            LARGE = { -- 大きい牌.
+                WIDTH = 25,
+                HEIGHT = 30,
+            },
+            SMALL = { -- 小さい牌.
+                WIDTH = 25,
+                HEIGHT = 18,
+            },
+            BACK = { -- 裏面.
+                WIDTH = 20,
+                HEIGHT = 25,
+            },
+            RESULT_WIN = { -- リザルト画面の牌.
+                WIDTH = 23,
+                HEIGHT = 28,
+            },
+            RESULT_HAND = { -- リザルト画面の手牌.
+                WIDTH = 22,
+                HEIGHT = 27,
+            },
+            SMALL_DRAW_MAX_WIDTH = 25, -- 大きいと判定するしきい値.
         },
         TITLE = {
             FIRST_ITEM = 1,

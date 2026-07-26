@@ -132,12 +132,14 @@ function HandScene:draw()
     gfx.drawText("CPU " .. match:score(Constants.Game.PLAYER_ID.CPU), 108, 17)
     gfx.drawText("D:" .. Tile.text(match.wall.doraIndicator or 0), 306, 3)
     gfx.drawText("CPU", 8, 34)
+	-- 牌の裏面のサイズ情報.
+    local backSize = Constants.UI.TILE_SIZE.BACK
     for i = 1, Constants.UI.HAND.CPU_TILE_COUNT do
         self:drawBack(
             Constants.UI.HAND.CPU_TILE_START_X + (i - 1) * Constants.UI.HAND.CPU_TILE_GAP,
             31,
-            20,
-            25
+            backSize.WIDTH,
+            backSize.HEIGHT
         )
     end
 	-- CPUの河(捨て牌)の描画.
@@ -148,13 +150,15 @@ function HandScene:draw()
     gfx.drawTextAligned(center, Constants.UI.SCREEN.CENTER_X, 115, kTextAlignment.center)
 	-- プレイヤーの河(捨て牌)の描画.
     gfx.drawText("YOU RIVER", 8, 135); self:drawRiver(player.hand.river, 150)
+	-- 大きい牌のサイズ情報.
+    local largeSize = Constants.UI.TILE_SIZE.LARGE
     for i, tile in ipairs(player.hand.tiles) do
         self:drawTile(
             tile,
             Constants.UI.HAND.PLAYER_TILE_START_X + (i - 1) * Constants.UI.HAND.PLAYER_TILE_GAP,
             188,
-            25,
-            30,
+            largeSize.WIDTH,
+            largeSize.HEIGHT,
             i == self.selected and self.state == "PLAYER"
         )
     end
@@ -168,7 +172,15 @@ end
 
 ---牌の描画.
 function HandScene:drawTile(tile, x, y, w, h, selected)
-    TileRenderer.draw(tile, x, y, w, h, w <= 25, selected)
+    TileRenderer.draw(
+        tile,
+        x,
+        y,
+        w,
+        h,
+        w <= Constants.UI.TILE_SIZE.SMALL_DRAW_MAX_WIDTH,
+        selected
+    )
 end
 
 ---牌の裏側の描画.
@@ -180,14 +192,16 @@ end
 ---@param river table 捨て牌の配列.
 ---@param y number 描画位置Y.
 function HandScene:drawRiver(river, y)
+	-- 小さい牌のサイズ情報.
+    local smallSize = Constants.UI.TILE_SIZE.SMALL
     for i = 1, math.min(#river, Constants.UI.HAND.RIVER_MAX_TILES) do
         self:drawTile(
             river[i],
             Constants.UI.HAND.RIVER_START_X
                 + ((i - 1) % Constants.UI.HAND.RIVER_COLUMNS) * Constants.UI.HAND.RIVER_TILE_GAP_X,
             y + math.floor((i - 1) / Constants.UI.HAND.RIVER_COLUMNS) * Constants.UI.HAND.RIVER_ROW_GAP,
-            25,
-            18,
+            smallSize.WIDTH,
+            smallSize.HEIGHT,
             false
         )
     end

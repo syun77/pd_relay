@@ -44,18 +44,28 @@ function ResultScene:draw()
     gfx.drawTextAligned(title, Constants.UI.SCREEN.CENTER_X, 42, kTextAlignment.center)
 
     if result and result.info then
+        local winTileSize = Constants.UI.TILE_SIZE.RESULT_WIN
         gfx.drawText("YAKU", 20, 72)
         gfx.drawTextAligned(result.info.names, 225, 72, kTextAlignment.center)
         gfx.drawText("WIN", 20, 98)
-        self:drawTile(result.winTile, 58, 92, 23, 28)
+        self:drawTile(result.winTile, 58, 92, winTileSize.WIDTH, winTileSize.HEIGHT)
         gfx.drawText("+" .. result.points, 94, 101)
     else
         gfx.drawTextAligned("No points move.", Constants.UI.SCREEN.CENTER_X, 92, kTextAlignment.center)
     end
 
     if result and result.cpuHand and match.handNumber < Constants.Game.HANDS_PER_MATCH then
+        local resultHandSize = Constants.UI.TILE_SIZE.RESULT_HAND
         gfx.drawText("CPU HAND", 20, 136)
-        for i, tile in ipairs(result.cpuHand) do self:drawTile(tile, 20 + (i - 1) * 26, 154, 22, 27) end
+        for i, tile in ipairs(result.cpuHand) do
+            self:drawTile(
+                tile,
+                20 + (i - 1) * 26,
+                154,
+                resultHandSize.WIDTH,
+                resultHandSize.HEIGHT
+            )
+        end
     end
     gfx.drawText(
         "YOU " .. match:score(Constants.Game.PLAYER_ID.HUMAN)
