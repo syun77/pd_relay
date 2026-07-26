@@ -1,3 +1,4 @@
+import "Constants"
 import "domain/Tile"
 import "domain/MahjongRules"
 
@@ -11,15 +12,22 @@ function CpuStrategy.keepValue(hand, index, targetSuit)
 
     local number, suit = Tile.number(tile), Tile.suit(tile)
     for distance = 1, 2 do
+        if suit == Constants.Game.SUIT.HONOR then break end
         if number - distance >= 1 and counts[tile - distance] > 0 and Tile.suit(tile - distance) == suit then
             value = value + (3 - distance)
         end
-        if number + distance <= 9 and counts[tile + distance] > 0 and Tile.suit(tile + distance) == suit then
+        if number + distance <= Constants.Game.TILE.TYPES_PER_SUIT
+            and counts[tile + distance] > 0
+            and Tile.suit(tile + distance) == suit then
             value = value + (3 - distance)
         end
     end
 
-    if number == 1 or number == 9 then value = value - 1 end
+    if suit == Constants.Game.SUIT.HONOR
+        or number == 1
+        or number == Constants.Game.TILE.TYPES_PER_SUIT then
+        value = value - 1
+    end
     if targetSuit and suit == targetSuit then value = value + 4 end
     return value
 end

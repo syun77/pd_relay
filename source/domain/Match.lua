@@ -21,7 +21,7 @@ end
 
 local function makeWall()
     local deck = {}
-    for tile = Constants.Game.TILE.MIN_INDEX, Constants.Game.TILE.MAX_INDEX do
+    for tile = Constants.Game.TILE.MIN_INDEX, Constants.Game.TILE.PLAYABLE_MAX_INDEX do
         for _ = 1, Constants.Game.TILE.COPIES_PER_TYPE do table.insert(deck, tile) end
     end
     shuffle(deck)
@@ -160,7 +160,7 @@ function Match:cpuTurn()
     local player, cpu = self:player(), self:cpu()
     if self.cpuType == Constants.Game.CPU_TYPE.HAIDO and not self.cpuAbilityUsed then
         self.cpuAbilityUsed = true
-        self.targetSuit = math.random(1, Constants.Game.TILE.SUIT_COUNT)
+        self.targetSuit = math.random(1, Constants.Game.TILE.NUMBERED_SUIT_COUNT)
         for i = self.wall.position + 1, self.wall.endPosition do
             if Tile.suit(self.wall.tiles[i]) == self.targetSuit then
                 self.wall.tiles[self.wall.position + 1], self.wall.tiles[i] = self.wall.tiles[i], self.wall.tiles[self.wall.position + 1]
@@ -230,7 +230,7 @@ function Match:updatePressure()
     local cpu = self:cpu()
     local counts = Rules.countsFor(cpu.hand.tiles)
     local value = 0
-    for i = Constants.Game.TILE.MIN_INDEX, Constants.Game.TILE.MAX_INDEX do
+    for i = Constants.Game.TILE.MIN_INDEX, Constants.Game.TILE.PLAYABLE_MAX_INDEX do
         if counts[i] >= 2 then value = value + 1 end
         if counts[i] >= 3 then value = value + 1 end
         local number = Tile.number(i)

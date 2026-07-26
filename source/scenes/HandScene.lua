@@ -29,7 +29,9 @@ function HandScene:enter()
     self.deadline = 0
     self.pendingTile = nil
     local tile, info = self.context.match:drawForPlayer()
-    if not tile then self:showResult(info); return end
+    if not tile then
+		self:showResult(info)
+	return end
     if info then self.state = "TSUMO" end
 end
 
@@ -106,7 +108,9 @@ end
 ---@param now number 現在時刻.
 function HandScene:drawNext(now)
     local tile, info = self.context.match:drawForPlayer()
-    if not tile then self:showResult(info); return end
+    if not tile then
+		self:showResult(info)
+	return end
     self.state = info and "TSUMO" or "PLAYER"
     if self.state == "PLAYER" and self.context.match:player().hand.riichi then
         self.selected = #self.context.match:player().hand.tiles

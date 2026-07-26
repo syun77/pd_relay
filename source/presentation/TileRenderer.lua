@@ -3,6 +3,7 @@
 	手牌描画モジュール.
 ========================================================
 ]]
+import "Constants"
 import "domain/Tile"
 
 local gfx <const> = playdate.graphics
@@ -87,6 +88,22 @@ local function drawSou(number, x, y, w, h, small)
     end
 end
 
+---字牌の描画.
+---@param number number 字牌の種類.
+---@param x number 描画位置X.
+---@param y number 描画位置Y.
+---@param w number 幅.
+---@param h number 高さ.
+local function drawHonor(number, x, y, w, h)
+    local text = Constants.Game.HONOR_NAME[number] or "?"
+    gfx.drawTextAligned(
+        text,
+        x + math.floor(w / 2),
+        y + math.floor((h - 12) / 2),
+        kTextAlignment.center
+    )
+end
+
 ---描画.
 ---@param tile number 牌の種類.
 ---@param x number 描画位置X.
@@ -110,15 +127,18 @@ function TileRenderer.draw(tile, x, y, w, h, small, selected)
 	gfx.drawRoundRect(x + 1, y + 1, w - 2, h - 2, 2)
 
     local suit, number = Tile.suit(tile), Tile.number(tile)
-    if suit == 1 then
+    if suit == Constants.Game.SUIT.MAN then
 		-- 萬子の描画.
 		drawMan(number, x, y, w, h, small)
-    elseif suit == 2 then
+    elseif suit == Constants.Game.SUIT.PIN then
 		-- 筒子の描画.
 		drawPin(number, x, y, w, h, small)
-    else
+    elseif suit == Constants.Game.SUIT.SOU then
 		-- 索子の描画.
 		drawSou(number, x, y, w, h, small)
+    else
+        -- 字牌の描画.
+        drawHonor(number, x, y, w, h)
 	end
 end
 

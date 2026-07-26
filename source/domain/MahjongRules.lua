@@ -76,7 +76,7 @@ function Rules.collectStandardDecompositions(hand, limit)
         end
 
         local number, suit = Tile.number(first), Tile.suit(first)
-        if number <= 7 then
+        if suit ~= Constants.Game.SUIT.HONOR and number <= 7 then
             local a, b = first + 1, first + 2
             if Tile.suit(a) == suit and Tile.suit(b) == suit and counts[a] > 0 and counts[b] > 0 then
                 counts[first], counts[a], counts[b] = counts[first] - 1, counts[a] - 1, counts[b] - 1
@@ -99,7 +99,11 @@ end
 
 function Rules.allSimple(hand)
     for _, tile in ipairs(hand) do
-        if Tile.number(tile) == 1 or Tile.number(tile) == 9 then return false end
+        if Tile.suit(tile) == Constants.Game.SUIT.HONOR
+            or Tile.number(tile) == 1
+            or Tile.number(tile) == Constants.Game.TILE.TYPES_PER_SUIT then
+            return false
+        end
     end
     return true
 end
@@ -107,6 +111,7 @@ end
 function Rules.oneSuit(hand)
     if #hand == 0 then return false end
     local suit = Tile.suit(hand[1])
+    if suit == Constants.Game.SUIT.HONOR then return false end
     for _, tile in ipairs(hand) do
         if Tile.suit(tile) ~= suit then return false end
     end
@@ -128,7 +133,7 @@ function Rules.sequencePair(decomposition)
 end
 
 function Rules.hasShapeDraw(hand13)
-    for tile = Constants.Game.TILE.MIN_INDEX, Constants.Game.TILE.MAX_INDEX do
+    for tile = Constants.Game.TILE.MIN_INDEX, Constants.Game.TILE.PLAYABLE_MAX_INDEX do
         if Rules.isCompleteShape(Rules.appendTile(hand13, tile)) then return true end
     end
     return false
